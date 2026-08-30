@@ -11,7 +11,7 @@ from plugins.bushiroad.bushiroad import get_handle_card
 from utilities import configure_console_encoding, ensure_directory
 
 front_directory = path.join(REPO_ROOT, 'game', 'front')
-back_directory = path.join(REPO_ROOT, 'game', 'double_sided')
+double_sided_directory = path.join(REPO_ROOT, 'game', 'double_sided')
 
 @command()
 @argument('deck_path')
@@ -19,7 +19,7 @@ back_directory = path.join(REPO_ROOT, 'game', 'double_sided')
 
 def cli(deck_path: str, format: DeckFormat):
     ensure_directory(front_directory)
-    ensure_directory(back_directory)
+    ensure_directory(double_sided_directory)
     if not (format == DeckFormat.BUSHIROAD_URL) and not path.isfile(deck_path):
         print(f'{deck_path} is not a valid file.')
         return
@@ -29,7 +29,7 @@ def cli(deck_path: str, format: DeckFormat):
         format,
         get_handle_card(
             front_directory,
-            back_directory
+            double_sided_directory
         )
     )
 

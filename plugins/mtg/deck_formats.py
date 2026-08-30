@@ -5,7 +5,7 @@ import os
 import re
 
 from enum import Enum
-from typing import Callable, Tuple
+from typing import Callable, Optional, Tuple
 from xml.etree import ElementTree as ET
 
 from plugins.mtg.patterns import DECKSTATS_PATTERN, MOXFIELD_PATTERN
@@ -462,10 +462,108 @@ class DeckFormat(str, Enum):
     MTGA = "mtga"
     MTGO = "mtgo"
     SCRYFALL_JSON = "scryfall_json"
+    SCRYFALL_QUERY = "scryfall_query"
     SIMPLE = "simple"
     URL = "url"
 
-def parse_deck(deck_text: str, format: DeckFormat, handle_card: Callable, front_img_dir: str = '', double_sided_dir: str = '') -> None:
+SCRYFALL_SEARCH_URL = 'https://api.scryfall.com/cards/search'
+
+def scryfall_face_images(card: dict) -> Tuple[Optional[str], Optional[str]]:
+    """(front, back) PNG urls for a Scryfall card object.
+
+    Single-faced cards carry a top-level image_uris. Transform, modal and
+    reversible cards instead carry one image per entry in card_faces, so the
+    second face becomes the double-sided back.
+    """
+    images = card.get('image_uris') or {}
+    if images.get('png'):
+        return images['png'], None
+
+    faces = [f.get('image_uris', {}).get('png') for f in (card.get('card_faces') or [])]
+    faces = [url for url in faces if url]
+    if not faces:
+        return None, None
+    return faces[0], (faces[1] if len(faces) > 1 else None)
+
+# Scryfall search query
+#   Any query the search page accepts, e.g. (game:paper) set:slz prefer:best
+#
+#   The search already resolves to exact printings, so images come straight from
+#   the result rather than being looked up a second time per card. That makes it
+#   one request per page of 175 cards plus one per image.
+def parse_scryfall_query(query: str, front_img_dir: str, double_sided_dir: str, copies: int = 1) -> None:
+    from plugins.mtg.scryfall import request_scryfall, save_card_art_copies
+
+    query = (query or '').strip()
+    if not query:
+        print('Empty Scryfall query.')
+        return
+
+    url = SCRYFALL_SEARCH_URL
+    params = {'q': query, 'unique': 'cards', 'order': 'name'}
+    index = 0
+    total = None
+    error_cards = []
+
+    while url:
+        # request_scryfall raises for status, so a bad query arrives as an
+        # exception. Scryfall puts a readable explanation in the body, which is
+        # far more useful than the status code alone.
+        try:
+            response = request_scryfall(url, params=params)
+        except requests.exceptions.HTTPError as e:
+            status = e.response.status_code if e.response is not None else None
+            details = ''
+            try:
+                details = (e.response.json() or {}).get('details', '')
+            except Exception:
+                pass
+            if status == 404:
+                print(f'No cards matched: {query}')
+                if details:
+                    print(f'  {details}')
+            else:
+                print(f'Scryfall search failed ({status}) for: {query}')
+                if details:
+                    print(f'  {details}')
+            return
+        params = None  # next_page already carries the encoded query
+
+        page = response.json()
+        if total is None:
+            total = page.get('total_cards', 0)
+            suffix = '' if copies == 1 else f', {copies} copies each'
+            print(f'Scryfall query matched {total} card(s){suffix}')
+
+        for card in page.get('data', []):
+            index += 1
+            name = card.get('name', '')
+            clean_name = remove_nonalphanumeric(name)
+
+            parts = [f'Index: {index}', f'quantity: {copies}']
+            if card.get('set'): parts.append(f'set code: {card["set"]}')
+            if card.get('collector_number'): parts.append(f'collector number: {card["collector_number"]}')
+            if name: parts.append(f'name: {name}')
+            print(', '.join(parts))
+
+            try:
+                front_url, back_url = scryfall_face_images(card)
+                if not front_url:
+                    raise ValueError(f'no printable image for layout "{card.get("layout")}"')
+
+                save_card_art_copies(request_scryfall(front_url).content, front_img_dir, index, clean_name, copies)
+                if back_url and double_sided_dir:
+                    save_card_art_copies(request_scryfall(back_url).content, double_sided_dir, index, clean_name, copies)
+            except Exception as e:
+                print(f'Error: {e}')
+                error_cards.append((name, e))
+
+        url = page.get('next_page') if page.get('has_more') else None
+
+    if error_cards:
+        print(f'Errors: {error_cards}')
+
+def parse_deck(deck_text: str, format: DeckFormat, handle_card: Callable, front_img_dir: str = '', double_sided_dir: str = '', copies: int = 1) -> None:
     if format == DeckFormat.SIMPLE:
         parse_simple_list(deck_text, handle_card)
     elif format == DeckFormat.MTGA:
@@ -480,6 +578,8 @@ def parse_deck(deck_text: str, format: DeckFormat, handle_card: Callable, front_
         parse_moxfield(deck_text, handle_card)
     elif format == DeckFormat.SCRYFALL_JSON:
         parse_scryfall_json(deck_text, handle_card, front_img_dir, double_sided_dir)
+    elif format == DeckFormat.SCRYFALL_QUERY:
+        parse_scryfall_query(deck_text, front_img_dir, double_sided_dir, copies)
     elif format == DeckFormat.MPCFILL_XML:
         parse_mpcfill_xml(deck_text, handle_card)
     elif format == DeckFormat.CUBECOBRA_CSV:

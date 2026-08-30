@@ -29,6 +29,7 @@ double_sided_directory = os.path.join(REPO_ROOT, 'game', 'double_sided')
 @click.option('--prefer_ub', default=False, is_flag=True, show_default=True, help="Prefer Universe Beyond printings when available.")
 @click.option('--ignore_ub', default=False, is_flag=True, show_default=True, help="Exclude Universe Beyond printings from consideration.")
 @click.option('--tokens', default=False, is_flag=True, show_default=True, help="Fetch related tokens when fetching cards")
+@click.option('--copies', default=1, type=click.IntRange(min=1), show_default=True, help="Copies of each card to fetch. Only applies to the scryfall_query format, where a search returns one of each card.")
 
 def cli(
     deck_path: str,
@@ -47,10 +48,12 @@ def cli(
     ignore_ub: bool,
 
     tokens: bool,
+
+    copies: int,
 ):
     ensure_directory(front_directory)
     ensure_directory(double_sided_directory)
-    if format == DeckFormat.URL:
+    if format in (DeckFormat.URL, DeckFormat.SCRYFALL_QUERY):
         deck_text = deck_path
     else:
         if not os.path.isfile(deck_path):
@@ -93,6 +96,7 @@ def cli(
         get_handle_card,
         front_directory,
         double_sided_directory,
+        copies,
     )
 
 if __name__ == '__main__':

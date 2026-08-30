@@ -30,6 +30,8 @@ double_sided_directory = os.path.join(REPO_ROOT, 'game', 'double_sided')
 @click.option('--ignore_ub', default=False, is_flag=True, show_default=True, help="Exclude Universe Beyond printings from consideration.")
 @click.option('--tokens', default=False, is_flag=True, show_default=True, help="Fetch related tokens when fetching cards")
 @click.option('--copies', default=1, type=click.IntRange(min=1), show_default=True, help="Copies of each card to fetch. Only applies to the scryfall_query format, where a search returns one of each card.")
+@click.option('--unique', default=None, type=click.Choice(['cards', 'prints', 'art'], case_sensitive=False), help="How Scryfall de-duplicates search results. Overrides the value in a pasted search URL. [default: cards]")
+@click.option('--order', default=None, type=click.Choice(['name', 'set', 'released', 'rarity', 'color', 'usd', 'cmc', 'artist', 'collector_number'], case_sensitive=False), help="Sort order for search results. Overrides the value in a pasted search URL. [default: name]")
 
 def cli(
     deck_path: str,
@@ -50,6 +52,8 @@ def cli(
     tokens: bool,
 
     copies: int,
+    unique: str,
+    order: str,
 ):
     ensure_directory(front_directory)
     ensure_directory(double_sided_directory)
@@ -97,6 +101,8 @@ def cli(
         front_directory,
         double_sided_directory,
         copies,
+        unique,
+        order,
     )
 
 if __name__ == '__main__':

@@ -3,6 +3,7 @@ import io
 import json
 import os
 import re
+import urllib.parse
 
 from enum import Enum
 from typing import Callable, Optional, Tuple
@@ -399,7 +400,15 @@ def parse_cubecobra_csv(deck_text, handle_card: Callable, front_img_dir: str, do
 #   Supported sites:
 #     Aetherhub, Archidekt, Deckstats, Moxfield, MTG Goldfish,
 #     MTGJSON, Scryfall, Tapped Out, TCGPlayer
-def parse_url(deck_url, handle_card: Callable) -> None:
+def parse_url(deck_url, handle_card: Callable, front_img_dir: str = '', double_sided_dir: str = '',
+              copies: int = 1, unique: str = None, order: str = None) -> None:
+    # A search URL is not a decklist; mtg_parser cannot read one, so hand it to
+    # the query parser rather than failing on something we can clearly handle.
+    if is_scryfall_search_url(deck_url):
+        print('Detected a Scryfall search URL.')
+        parse_scryfall_query(deck_url, front_img_dir, double_sided_dir, copies, unique, order)
+        return
+
     scraper = cloudscraper.create_scraper()
     try:
         cards = mtg_parser.parse_deck(deck_url, scraper)
@@ -468,6 +477,37 @@ class DeckFormat(str, Enum):
 
 SCRYFALL_SEARCH_URL = 'https://api.scryfall.com/cards/search'
 
+# Real parameters of the Scryfall search API. The search page also puts UI-only
+# ones in the address bar (`as=grid`), which are ignored.
+SCRYFALL_SEARCH_PARAMS = ('unique', 'order', 'dir', 'include_extras', 'include_multilingual', 'include_variations')
+
+def is_scryfall_search_url(text: str) -> bool:
+    text = (text or '').strip()
+    if not text:
+        return False
+    lowered = text.lower()
+    if not lowered.startswith(('http://', 'https://', 'scryfall.com/', 'api.scryfall.com/')):
+        return False
+    parsed = urllib.parse.urlparse(text if '://' in lowered else 'https://' + text)
+    return parsed.netloc.lower().endswith('scryfall.com') and '/search' in parsed.path
+
+def split_scryfall_search(text: str) -> Tuple[str, dict]:
+    """Accept either a bare query or a Scryfall search URL.
+
+    Returns the query plus any search parameters carried in the URL, so pasting
+    a link straight from the address bar keeps its unique/order settings.
+    """
+    text = (text or '').strip()
+    if not is_scryfall_search_url(text):
+        return text, {}
+
+    raw = text if '://' in text.lower() else 'https://' + text
+    query_string = urllib.parse.parse_qs(urllib.parse.urlparse(raw).query)
+    query = (query_string.get('q') or [''])[0].strip()
+    params = {k: query_string[k][0] for k in SCRYFALL_SEARCH_PARAMS if query_string.get(k)}
+    return query, params
+
+
 def scryfall_face_images(card: dict) -> Tuple[Optional[str], Optional[str]]:
     """(front, back) PNG urls for a Scryfall card object.
 
@@ -491,16 +531,32 @@ def scryfall_face_images(card: dict) -> Tuple[Optional[str], Optional[str]]:
 #   The search already resolves to exact printings, so images come straight from
 #   the result rather than being looked up a second time per card. That makes it
 #   one request per page of 175 cards plus one per image.
-def parse_scryfall_query(query: str, front_img_dir: str, double_sided_dir: str, copies: int = 1) -> None:
+def parse_scryfall_query(query: str, front_img_dir: str, double_sided_dir: str, copies: int = 1,
+                         unique: str = None, order: str = None) -> None:
     from plugins.mtg.scryfall import request_scryfall, save_card_art_copies
 
-    query = (query or '').strip()
+    raw_input_text = (query or '').strip()
+    query, url_params = split_scryfall_search(raw_input_text)
     if not query:
-        print('Empty Scryfall query.')
+        if is_scryfall_search_url(raw_input_text):
+            print('That Scryfall search URL has no "q" parameter.')
+        else:
+            print('Empty Scryfall query.')
         return
 
+    # Precedence: explicit options beat the URL, which beats the defaults.
+    params = {'unique': 'cards', 'order': 'name'}
+    params.update(url_params)
+    if unique:
+        params['unique'] = unique
+    if order:
+        params['order'] = order
+    params['q'] = query
+
+    print(f'Scryfall search: {query}')
+    print(f'  unique={params["unique"]}, order={params["order"]}')
+
     url = SCRYFALL_SEARCH_URL
-    params = {'q': query, 'unique': 'cards', 'order': 'name'}
     index = 0
     total = None
     error_cards = []
@@ -563,7 +619,8 @@ def parse_scryfall_query(query: str, front_img_dir: str, double_sided_dir: str, 
     if error_cards:
         print(f'Errors: {error_cards}')
 
-def parse_deck(deck_text: str, format: DeckFormat, handle_card: Callable, front_img_dir: str = '', double_sided_dir: str = '', copies: int = 1) -> None:
+def parse_deck(deck_text: str, format: DeckFormat, handle_card: Callable, front_img_dir: str = '', double_sided_dir: str = '',
+               copies: int = 1, unique: str = None, order: str = None) -> None:
     if format == DeckFormat.SIMPLE:
         parse_simple_list(deck_text, handle_card)
     elif format == DeckFormat.MTGA:
@@ -579,12 +636,12 @@ def parse_deck(deck_text: str, format: DeckFormat, handle_card: Callable, front_
     elif format == DeckFormat.SCRYFALL_JSON:
         parse_scryfall_json(deck_text, handle_card, front_img_dir, double_sided_dir)
     elif format == DeckFormat.SCRYFALL_QUERY:
-        parse_scryfall_query(deck_text, front_img_dir, double_sided_dir, copies)
+        parse_scryfall_query(deck_text, front_img_dir, double_sided_dir, copies, unique, order)
     elif format == DeckFormat.MPCFILL_XML:
         parse_mpcfill_xml(deck_text, handle_card)
     elif format == DeckFormat.CUBECOBRA_CSV:
         parse_cubecobra_csv(deck_text, handle_card, front_img_dir, double_sided_dir)
     elif format == DeckFormat.URL:
-        parse_url(deck_text, handle_card)
+        parse_url(deck_text, handle_card, front_img_dir, double_sided_dir, copies, unique, order)
     else:
         raise ValueError("Unrecognized deck format")

@@ -7,47 +7,53 @@ import re
 def remove_nonalphanumeric(s: str) -> str:
     return re.sub(r'[^\w]', '', s)
 
-CURIOSA_API_BASE = 'https://curiosa.io/api/trpc/'
+# Curiosa moved to sorcerytcg.com; curiosa.io redirects there but drops the API path.
+CURIOSA_API_BASE = 'https://sorcerytcg.com/api/trpc/'
 
 session = Session()
-CURIOSA_REFERER = 'https://curiosa.io/'
+CURIOSA_REFERER = 'https://sorcerytcg.com/'
 
-DECK_ENDPOINTS = [
-    'deck.getDecklistById',
-    'deck.getAvatarById',
-    'deck.getSideboardById',
-    'deck.getMaybeboardById',
-]
+def to_decklist_entry(entry):
+    # Keep the shape deck_formats reads: card name, quantity and the chosen printing's image.
+    card = entry.get('card') or {}
+    variants = [
+        {'id': printing.get('id'), 'src': (printing.get('meta') or {}).get('image')}
+        for printing in card.get('printings') or []
+    ]
+    printing = entry.get('printing') or {}
+    image = (printing.get('meta') or {}).get('image')
+    if image and not any(variant['id'] == printing.get('id') for variant in variants):
+        variants.insert(0, {'id': printing.get('id'), 'src': image})
 
-def get_cards(card_result):
-    result = card_result.get('result', {}).get('data', {}).get('json', [])
-    if isinstance(result, dict):
-        return [result]
-    return result
+    return {
+        'quantity': entry.get('quantity'),
+        'variantId': entry.get('printingId'),
+        'card': {'name': card.get('name'), 'variants': variants},
+    }
 
 def get_curiosa_decklist(deck_id: str):
     deck_id = deck_id.strip()
 
-    api_url = CURIOSA_API_BASE + ','.join(DECK_ENDPOINTS)
-    deck_payload = {str(i): {'json': {'id': deck_id}} for i in range(len(DECK_ENDPOINTS))}
-    params = {'batch': '1', 'input': dumps(deck_payload)}
+    payload = {'0': {'json': {'id': deck_id, 'collectionTracking': False}}}
+    params = {'batch': '1', 'input': dumps(payload)}
     headers = {'referer': CURIOSA_REFERER}
 
-    r = get(api_url, params=params, headers=headers)
+    r = session.get(CURIOSA_API_BASE + 'deck.get', params=params, headers=headers)
 
     # Check for 2XX response code
     r.raise_for_status()
 
     sleep(0.075)
 
-    decklist = []
-    for result in r.json():
-        decklist.extend(get_cards(result))
+    deck = r.json()[0].get('result', {}).get('data', {}).get('json')
+    if not deck:
+        raise ValueError(f'Deck {deck_id} was not found or is not public.')
 
-    return decklist
+    # Every board (Main, Avatar, Sideboard, Maybeboard), as the old per-board endpoints returned.
+    return [to_decklist_entry(entry) for entry in deck.get('decklist') or []]
 
 def request_curiosa(url: str):
-    r = get(url)
+    r = session.get(url)
 
     # Check for 2XX response code
     r.raise_for_status()

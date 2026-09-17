@@ -30,7 +30,7 @@ def parse_deck_helper(deck_text: str, handle_card: Callable, deck_splitter: Call
         print(f'Errors: {error_lines}')
 
 def parse_curiosa(deck_text: str, handle_card: Callable) -> None:
-    SHARE_URL_PATTERN = compile(r'https://curiosa\.io/decks/(\w+)')
+    SHARE_URL_PATTERN = compile(r'https://(?:www\.)?(?:curiosa\.io|sorcerytcg\.com)/decks/(\w+)')
 
     if os.path.isfile(deck_text):
         deck_text = open(deck_text, "r").read()

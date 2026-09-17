@@ -35,7 +35,7 @@ Options:
 
 ### `curiosa_url`
 
-Curiosa URL format uses the full URL of a deck from [Curiosa](https://curiosa.io).
+Curiosa URL format uses the full URL of a deck from [Curiosa](https://sorcerytcg.com), which moved from `curiosa.io` to `sorcerytcg.com`. Links from either domain work.
 
 ```
 https://curiosa.io/decks/cme5x329q00k9jo04ouuycsek

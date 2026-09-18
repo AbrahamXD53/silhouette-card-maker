@@ -122,6 +122,8 @@ The [Arkham Horror: The Card Game plugin](plugins/arkham_horror_lcg/README.md) s
 
 The [Ashes Reborn plugin](plugins/ashes_reborn/README.md) supports **Ashes** and **Ashes DB** formats.
 
+The [Battle Spirits Saga plugin](plugins/battle_spirits_saga/README.md) supports **BSSDB** links and text exports.
+
 The [Bushiroad plugin](plugins/bushiroad/README.md) supports **Bushiroad Deck Log** format for Cardfight Vanguard, Shadowverse: Evolve, Weiss Schwarz, Godzilla Card Game, and hololive.
 
 The [Digimon plugin](plugins/digimon/README.md) supports **Digimoncard.app**, **Digimoncard.dev**, **Digimoncard.io**, **DigimonMeta**, **Tabletop Simulator**, and **Untap** formats.
@@ -139,6 +141,8 @@ The [Grand Archive plugin](plugins/grand_archive/README.md) supports **Omnideck*
 The [Gundam plugin](plugins/gundam/README.md) supports **DeckPlanet**, **Egman Events**, **ExBurst**, and **Limitless TCG** formats.
 
 The [KeyForge plugin](plugins/keyforge/README.md) supports **Master Vault** (including **Decks of KeyForge** links) and **Archon Arcana** formats.
+
+The [Kodem plugin](plugins/kodem/README.md) supports the **Kodem Deck Builder** list format.
 
 The [Lord of the Rings: Living Card Game plugin](plugins/lotr_lcg/README.md) supports **RingsDB decklists**, **RingsDB fellowships**, and **RingsDB scenarios**, using user-supplied local back scans.
 

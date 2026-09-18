@@ -126,6 +126,8 @@ The [Battle Spirits Saga plugin](plugins/battle_spirits_saga/README.md) supports
 
 The [Bushiroad plugin](plugins/bushiroad/README.md) supports **Bushiroad Deck Log** format for Cardfight Vanguard, Shadowverse: Evolve, Weiss Schwarz, Godzilla Card Game, and hololive.
 
+The [Cyberpunk TCG plugin](plugins/cyberpunk/README.md) supports **cyberpunktcg.com** (netdeck.gg) deck links.
+
 The [Digimon plugin](plugins/digimon/README.md) supports **Digimoncard.app**, **Digimoncard.dev**, **Digimoncard.io**, **DigimonMeta**, **Tabletop Simulator**, and **Untap** formats.
 
 The [Echoes of Astra plugin](plugins/echoes_of_astra/README.md) supports **AstraBuilder** format.

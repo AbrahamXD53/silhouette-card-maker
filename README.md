@@ -158,6 +158,8 @@ The [Riftbound plugin](plugins/riftbound/README.md) supports **Piltover Archive*
 
 The [Sorcery: Contested Realm plugin](plugins/sorcery_contested_realm/README.md) supports **Curiosa** format.
 
+The [Star Wars: Destiny plugin](plugins/star_wars_destiny/README.md) supports **A Renewed Hope** decklist links.
+
 The [Star Wars Unlimited plugin](plugins/star_wars_unlimited/README.md) supports **Melee**, **Picklist**, and **SWUDB** formats.
 
 The [UniVersus plugin](plugins/universus/README.md) supports **universus.cards** deck links.

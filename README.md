@@ -112,6 +112,8 @@ Plugins streamline the process for acquiring card images for various games.
 
 The [Magic: The Gathering plugin](plugins/mtg/README.md) supports various decklist formats, including **Archidekt**, **CubeCobra**, **Deckstats**, **MPCFill**, **MTGA**, **MTGO**, **Moxfield**, and **Scryfall** formats.
 
+The [Palworld TCG plugin](plugins/palworld/README.md) supports **palworldtcg.gg** deck links.
+
 The [Pokemon plugin](plugins/pokemon/README.md) supports **Limitless TCG** format.
 
 The [Yu-Gi-Oh! plugin](plugins/yugioh/README.md) supports **YDK** and **YDKE** formats.

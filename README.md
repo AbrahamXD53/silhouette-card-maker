@@ -128,6 +128,8 @@ The [Bushiroad plugin](plugins/bushiroad/README.md) supports **Bushiroad Deck Lo
 
 The [Cyberpunk TCG plugin](plugins/cyberpunk/README.md) supports **cyberpunktcg.com** (netdeck.gg) deck links.
 
+The [DeckPlanet plugin](plugins/deckplanet/README.md) supports **DeckPlanet** deck links for Alpha Clash, Cyberpunk TCG, Dragon Ball Super Masters, Dragon Ball Super Fusion World, Gundam, Hellbreak, Naruto CCG, Neuroscape, One Piece, Riftbound, Star Wars Unlimited, and Wonders of the First.
+
 The [Digimon plugin](plugins/digimon/README.md) supports **Digimoncard.app**, **Digimoncard.dev**, **Digimoncard.io**, **DigimonMeta**, **Tabletop Simulator**, and **Untap** formats.
 
 The [Echoes of Astra plugin](plugins/echoes_of_astra/README.md) supports **AstraBuilder** format.

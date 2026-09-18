@@ -136,6 +136,8 @@ The [Echoes of Astra plugin](plugins/echoes_of_astra/README.md) supports **Astra
 
 The [Elestrals plugin](plugins/elestrals/README.md) supports **Elestrals** format.
 
+The [ExBurst plugin](plugins/exburst/README.md) supports **ExBurst** deck links for Union Arena (English and Asia), Gundam, Riftbound, Cyberpunk TCG, Naruto Card Game, and Naruto Mythos TCG.
+
 The [Final Fantasy plugin](plugins/final_fantasy/README.md) supports **OCTGN**, **Tabletop Simulator**, and **Untap** formats.
 
 The [Flesh and Blood plugin](plugins/flesh_and_blood/README.md) supports **Fabrary** format.

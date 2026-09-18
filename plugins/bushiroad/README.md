@@ -2,7 +2,7 @@
 
 This plugin reads deck URLs, automatically retrieves the decklist and fetches card art from Bushiroad, and puts them in the proper `game/` directories.
 
-This plugin supports decklist URLs from [Bushiroad Deck Log](https://decklog-en.bushiroad.com/) for the English edition of Cardfight Vanguard, Shadowverse: Evolve, Weiss Schwarz, Godzilla, and hololive. To learn more, see [here](#formats).
+This plugin supports decklist URLs from [Bushiroad Deck Log](https://decklog-en.bushiroad.com/) for the English edition of Cardfight Vanguard, Shadowverse: Evolve, Weiss Schwarz, Godzilla, and hololive, and from the [Japanese Deck Log](https://decklog.bushiroad.com/) for Weiss Schwarz (images from ws-tcg.com). To learn more, see [here](#formats).
 
 ## Basic Instructions
 

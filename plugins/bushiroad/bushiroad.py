@@ -7,7 +7,10 @@ from re import sub
 from unicodedata import normalize, category
 from enum import Enum
 
-DECK_API_URL = 'https://decklog-en.bushiroad.com/system/app/api/view/{deck_code}'
+# Deck Log has an English and a Japanese site with the same API.
+DECK_API_URL = 'https://{host}/system/app/api/view/{deck_code}'
+ENGLISH_HOST = 'decklog-en.bushiroad.com'
+JAPANESE_HOST = 'decklog.bushiroad.com'
 
 session = Session()
 
@@ -34,6 +37,11 @@ game_image_url_mapping = {
     GameTitle.HOLOLIVE: 'https://en.hololive-official-cardgame.com/wp-content/images/cardlist/{card_image}'
 }
 
+# Japanese Deck Log decks use the Japanese sites' images.
+japanese_image_url_mapping = {
+    GameTitle.WEISS_SCHWARZ: 'https://ws-tcg.com/wordpress/wp-content/images/cardlist/{card_image}',
+}
+
 def request_bushiroad(query: str, referer: str = '') -> Response:
     if referer == '':
         r = session.get(query, headers = {'user-agent': 'silhouette-card-maker/0.1', 'accept': '*/*'})
@@ -47,15 +55,20 @@ def request_bushiroad(query: str, referer: str = '') -> Response:
 
     return r
 
-def resolve_image_url(game_title: GameTitle, card_image: str) -> str:
-    image_url_template = game_image_url_mapping.get(game_title)
+def resolve_image_url(game_title: GameTitle, card_image: str, host: str = ENGLISH_HOST) -> str:
+    mapping = japanese_image_url_mapping if host == JAPANESE_HOST else game_image_url_mapping
+    image_url_template = mapping.get(game_title)
     if image_url_template is None:
+        if host == JAPANESE_HOST:
+            raise ValueError(f'Japanese Deck Log is supported for Weiss Schwarz only, not {game_title.value}.')
         raise ValueError(f'Unsupported game title: {game_title}')
     return image_url_template.format(card_image=card_image)
 
-def fetch_decklist(deck_code: str):
-    deck_request = request_bushiroad(DECK_API_URL.format(deck_code=deck_code), 'https://decklog-en.bushiroad.com/')
+def fetch_decklist(deck_code: str, host: str = ENGLISH_HOST):
+    deck_request = request_bushiroad(DECK_API_URL.format(host=host, deck_code=deck_code), f'https://{host}/')
     json = deck_request.json()
+    if not json:
+        raise ValueError(f'Deck {deck_code} was not found on {host}.')
 
     game_title_id = str(json.get('game_title_id'))
     game_title = game_title_id_mapping.get(game_title_id)

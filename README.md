@@ -124,7 +124,7 @@ The [Ashes Reborn plugin](plugins/ashes_reborn/README.md) supports **Ashes** and
 
 The [Battle Spirits Saga plugin](plugins/battle_spirits_saga/README.md) supports **BSSDB** links and text exports.
 
-The [Bushiroad plugin](plugins/bushiroad/README.md) supports **Bushiroad Deck Log** format for Cardfight Vanguard, Shadowverse: Evolve, Weiss Schwarz, Godzilla Card Game, and hololive.
+The [Bushiroad plugin](plugins/bushiroad/README.md) supports **Bushiroad Deck Log** format for Cardfight Vanguard, Shadowverse: Evolve, Weiss Schwarz, Godzilla Card Game, and hololive, and Weiss Schwarz decks on the Japanese Deck Log.
 
 The [Cyberpunk TCG plugin](plugins/cyberpunk/README.md) supports **cyberpunktcg.com** (netdeck.gg) deck links.
 
@@ -169,6 +169,8 @@ The [Star Wars: Destiny plugin](plugins/star_wars_destiny/README.md) supports **
 The [Star Wars Unlimited plugin](plugins/star_wars_unlimited/README.md) supports **Melee**, **Picklist**, and **SWUDB** formats.
 
 The [UniVersus plugin](plugins/universus/README.md) supports **universus.cards** deck links.
+
+The [Weiss Schwarz plugin](plugins/weiss_schwarz/README.md) supports **EncoreDecks** deck links (English and Japanese), with official card images.
 
 ## create_pdf.py
 `create_pdf.py` is a CLI tool that layouts your card images into a PDF with registration marks that can be cut out with the appropriate cutting template in [`cutting_templates/`](cutting_templates/).

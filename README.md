@@ -152,6 +152,8 @@ The [Lord of the Rings: Living Card Game plugin](plugins/lotr_lcg/README.md) sup
 
 The [Lorcana plugin](plugins/lorcana/README.md) supports **Dreamborn** format.
 
+The [Mitos y Leyendas plugin](plugins/mitos_y_leyendas/README.md) supports **ShadowForge** deck links.
+
 The [Netrunner plugin](plugins/netrunner/README.md) supports **bbCode** and **Jinteki** formats.
 
 The [One Piece plugin](plugins/one_piece/README.md) supports **Egman Events** and **OPTCG Simulator** formats.

@@ -164,6 +164,8 @@ The [One Piece plugin](plugins/one_piece/README.md) supports **Egman Events** an
 
 The [Riftbound plugin](plugins/riftbound/README.md) supports **Piltover Archive**, **Pixelborn**, and **Tabletop Simulator** formats.
 
+The [Shard Bugs TCG plugin](plugins/shard_bugs/README.md) supports a **decklist** of card names or card numbers.
+
 The [Sorcery: Contested Realm plugin](plugins/sorcery_contested_realm/README.md) supports **Curiosa** format.
 
 The [Star Wars: Destiny plugin](plugins/star_wars_destiny/README.md) supports **A Renewed Hope** decklist links.
